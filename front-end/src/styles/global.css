@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Netflix-inspired colors */
+    --primary: #e50914;
+    --primary-hover: #f40612;
+    --background: #141414;
+    --background-elevated: #1a1a1a;
+    --surface: #181818;
+    --surface-light: #232323;
+    --text-primary: #ffffff;
+    --text-secondary: #b3b3b3;
+    
+    /* Netflix-style shadows */
+    --shadow-1: 0 2px 4px rgba(0, 0, 0, 0.5);
+    --shadow-2: 0 4px 8px rgba(0, 0, 0, 0.6);
+    --shadow-elevated: 0 20px 40px rgba(0, 0, 0, 0.7);
+    
+    /* Smooth transitions */
+    --transition-short: 150ms cubic-bezier(0.5, 0, 0.1, 1);
+    --transition-medium: 300ms cubic-bezier(0.5, 0, 0.1, 1);
+    --transition-long: 500ms cubic-bezier(0.5, 0, 0.1, 1);
+    
+    /* Netflix-style gradients */
+    --gradient-overlay: linear-gradient(180deg, transparent 0%, rgba(20,20,20,0.95) 100%);
+    --gradient-spotlight: radial-gradient(50% 100% at 50% 0%, rgba(0,0,0,0) 0%, var(--background) 100%);
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--background);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+button, .button {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* Add new global styles */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--surface) 0%,
+        var(--surface-light) 50%,
+        var(--surface) 100%
+    );
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.slide-up {
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--surface-light);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
