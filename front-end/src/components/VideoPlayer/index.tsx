@@ -29,6 +29,12 @@ const FullscreenIcon = () => (
     </svg>
 );
 
+const SpeedIcon = () => (
+    <svg viewBox="0 0 24 24">
+        <path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44zm-9.79 6.84a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/>
+    </svg>
+);
+
 interface VideoPlayerProps {
     source: string;
     poster?: string;
@@ -49,6 +55,19 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, poster, onLoad }) => 
     const [showControls, setShowControls] = useState(false);
     const controlsTimeoutRef = useRef<NodeJS.Timeout>();
     const [isDragging, setIsDragging] = useState(false);
+    const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+    const [playbackSpeed, setPlaybackSpeed] = useState(1);
+    const speedMenuRef = useRef<HTMLDivElement>(null);
+
+    const speeds = [
+        { label: '0.25x', value: 0.25 },
+        { label: '0.5x', value: 0.5 },
+        { label: '0.75x', value: 0.75 },
+        { label: 'Normal', value: 1 },
+        { label: '1.25x', value: 1.25 },
+        { label: '1.5x', value: 1.5 },
+        { label: '2x', value: 2 },
+    ];
 
     const formatTime = (time: number) => {
         const minutes = Math.floor(time / 60);
@@ -140,6 +159,97 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, poster, onLoad }) => 
         showControlsTemporarily();
     };
 
+    const handleSpeedChange = (speed: number) => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        setPlaybackSpeed(speed);
+        video.playbackRate = speed;
+        setShowSpeedMenu(false);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (speedMenuRef.current && !speedMenuRef.current.contains(event.target as Node)) {
+                setShowSpeedMenu(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        const handleKeyPress = (e: KeyboardEvent) => {
+            const video = videoRef.current;
+            if (!video) return;
+
+            switch(e.key.toLowerCase()) {
+                case 'm':
+                    toggleMute();
+                    break;
+                case 'k':
+                case ' ':
+                    e.preventDefault();
+                    handlePlayPause();
+                    break;
+                case 'l':
+                    video.currentTime = Math.min(video.currentTime + 10, video.duration);
+                    break;
+                case 'j':
+                    video.currentTime = Math.max(video.currentTime - 10, 0);
+                    break;
+                case 'f':
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    } else {
+                        video.requestFullscreen();
+                    }
+                    break;
+                case '<':
+                    const slowerSpeed = speeds[Math.max(0, speeds.findIndex(s => s.value === playbackSpeed) - 1)];
+                    if (slowerSpeed) handleSpeedChange(slowerSpeed.value);
+                    break;
+                case '>':
+                    const fasterSpeed = speeds[Math.min(speeds.length - 1, speeds.findIndex(s => s.value === playbackSpeed) + 1)];
+                    if (fasterSpeed) handleSpeedChange(fasterSpeed.value);
+                    break;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, [isMuted, volume, playbackSpeed]);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+            showControlsTemporarily();
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+    useEffect(() => {
+        const handleMouseMove = () => {
+            if (isFullscreen) {
+                showControlsTemporarily();
+            }
+        };
+
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => window.removeEventListener('mousemove', handleMouseMove);
+    }, [isFullscreen]);
+
+    useEffect(() => {
+        return () => {
+            if (controlsTimeoutRef.current) {
+                clearTimeout(controlsTimeoutRef.current);
+            }
+        };
+    }, []);
+
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
@@ -171,69 +281,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, poster, onLoad }) => 
             video.removeEventListener('loadedmetadata', loadedMetadata);
             video.removeEventListener('waiting', waiting);
             video.removeEventListener('playing', playing);
-        };
-    }, []);
-
-    useEffect(() => {
-        const handleKeyPress = (e: KeyboardEvent) => {
-            const video = videoRef.current;
-            if (!video) return;
-
-            switch(e.key.toLowerCase()) {
-                case 'm':
-                    toggleMute();
-                    break;
-                case 'k':
-                case ' ':
-                    e.preventDefault();
-                    handlePlayPause();
-                    break;
-                case 'l':
-                    video.currentTime = Math.min(video.currentTime + 10, video.duration);
-                    break;
-                case 'j':
-                    video.currentTime = Math.max(video.currentTime - 10, 0);
-                    break;
-                case 'f':
-                    if (document.fullscreenElement) {
-                        document.exitFullscreen();
-                    } else {
-                        video.requestFullscreen();
-                    }
-                    break;
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyPress);
-        return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [isMuted, volume]);
-
-    useEffect(() => {
-        const handleFullscreenChange = () => {
-            setIsFullscreen(!!document.fullscreenElement);
-            showControlsTemporarily();
-        };
-
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    }, []);
-
-    useEffect(() => {
-        const handleMouseMove = () => {
-            if (isFullscreen) {
-                showControlsTemporarily();
-            }
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, [isFullscreen]);
-
-    useEffect(() => {
-        return () => {
-            if (controlsTimeoutRef.current) {
-                clearTimeout(controlsTimeoutRef.current);
-            }
         };
     }, []);
 
@@ -299,6 +346,29 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, poster, onLoad }) => 
                         </div>
                         
                         <div className="controls-right">
+                            <div className="speed-control" ref={speedMenuRef}>
+                                <button 
+                                    className="controls-button" 
+                                    onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                                    title="Playback Speed"
+                                >
+                                    <SpeedIcon />
+                                    <span className="speed-label">{playbackSpeed}x</span>
+                                </button>
+                                {showSpeedMenu && (
+                                    <div className="speed-menu">
+                                        {speeds.map((speed) => (
+                                            <button
+                                                key={speed.value}
+                                                className={`speed-menu-item ${speed.value === playbackSpeed ? 'active' : ''}`}
+                                                onClick={() => handleSpeedChange(speed.value)}
+                                            >
+                                                {speed.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                             <button className="controls-button" onClick={toggleFullscreen}>
                                 <FullscreenIcon />
                             </button>

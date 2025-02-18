@@ -167,6 +167,10 @@ button:hover {
     fill: currentColor;
 }
 
+.controls-button.active {
+    color: #1a73e8;
+}
+
 .volume-container {
     display: flex;
     align-items: center;
@@ -237,6 +241,59 @@ button:hover {
 
 .buffering .buffering-indicator {
     opacity: 1;
+}
+
+.speed-control {
+    position: relative;
+}
+
+.speed-label {
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+.speed-menu {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    background: rgba(28, 28, 28, 0.9);
+    border-radius: 4px;
+    padding: 8px 0;
+    margin-bottom: 8px;
+    min-width: 120px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+.speed-menu::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    right: 12px;
+    width: 8px;
+    height: 8px;
+    background: rgba(28, 28, 28, 0.9);
+    transform: rotate(45deg);
+}
+
+.speed-menu-item {
+    display: block;
+    width: 100%;
+    padding: 8px 16px;
+    text-align: left;
+    color: #fff;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.speed-menu-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.speed-menu-item.active {
+    color: var(--primary-color, #1a73e8);
 }
 
 /* Make the clickable areas larger on touch devices */
