@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer: React.FC = () => {
+
+    // Don't show header on watch page
+    if (location.pathname.startsWith('/watch/')) {
+        return null;
+    }
+    
     return (
         <footer className="footer">
             <div className="footer-content">

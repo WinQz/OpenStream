@@ -10,23 +10,242 @@
 }
 
 .video-player {
+    position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
     background: #000;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.video-player:fullscreen {
+    width: 100vw;
+    height: 100vh;
+}
+
+.video-player:fullscreen video {
+    height: 100vh;
 }
 
 video {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    cursor: pointer;
 }
 
-video::-webkit-media-controls {
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-    padding: 12px;
+.video-controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8) 70%);
+    padding: 24px 20px 16px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 2147483647;
 }
 
-video::-webkit-media-controls-panel {
-    width: calc(100% + 30px);
-    margin-left: -15px;
+.video-player:fullscreen .video-controls,
+.video-controls.active {
+    opacity: 1;
+}
+
+.video-player:fullscreen .video-controls:not(:hover) {
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+.video-player:fullscreen .video-controls {
+    padding: 32px 24px 24px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9) 70%);
+}
+
+.video-player:hover .video-controls {
+    opacity: 1;
+}
+
+.progress-container {
+    position: relative;
+    width: 100%;
+    height: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    user-select: none;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    transition: height 0.2s ease;
+}
+
+.progress-container:hover .progress-bar {
+    height: 5px;
+}
+
+.progress-filled {
+    height: 100%;
+    background: var(--primary-color, #ff0000);
+    border-radius: 2px;
+    position: relative;
+    transition: all 0.1s ease;
+}
+
+.progress-handle {
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--primary-color, #ff0000);
+    transform: translateY(-50%) scale(0);
+    transition: transform 0.2s ease;
+}
+
+.progress-container:hover .progress-handle {
+    transform: translateY(-50%) scale(1);
+}
+
+.controls-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.controls-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.controls-right {
+    display: flex;
+    gap: 12px;
+}
+
+button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 1.2em;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+.controls-button {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.85;
+    transition: opacity 0.2s ease;
+    position: relative;
+}
+
+.controls-button:hover {
+    opacity: 1;
+}
+
+.controls-button svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.volume-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.volume-slider {
+    width: 0;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    transition: width 0.2s ease;
+    overflow: visible;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+
+.volume-container:hover .volume-slider {
+    width: 80px;
+    margin-left: 8px;
+}
+
+.volume-level {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: white;
+    border-radius: 2px;
+}
+
+.volume-level::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+    transform: translateY(-50%) scale(0);
+    transition: transform 0.2s ease;
+}
+
+.volume-container:hover .volume-level::after {
+    transform: translateY(-50%) scale(1);
+}
+
+.time-display {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0 12px;
+    min-width: 100px;
+}
+
+.buffering-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 24px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.buffering .buffering-indicator {
+    opacity: 1;
+}
+
+/* Make the clickable areas larger on touch devices */
+@media (pointer: coarse) {
+    .progress-container {
+        height: 24px;
+    }
+
+    .volume-slider {
+        height: 24px;
+    }
 }
