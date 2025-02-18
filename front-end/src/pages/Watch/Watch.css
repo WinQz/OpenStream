@@ -1,8 +1,10 @@
 .watch-page {
     height: 100vh;
     width: 100vw;
-    background: #000;
+    background: var(--background);
     position: relative;
+    min-height: 100vh;
+    padding-top: 64px; /* Add padding to account for fixed header */
 }
 
 .watch-container {
@@ -20,6 +22,7 @@
     height: 100%;
     position: relative;
     background: #000;
+    margin-top: -64px; /* Offset the padding to allow full-screen video */
 }
 
 .video-player {
@@ -55,7 +58,9 @@
 
 .video-info {
     margin-top: var(--spacing-lg);
-    padding: var(--spacing-lg);
+    padding: 24px;
+    max-width: 800px;
+    margin: 0 auto;
     background: var(--surface);
     border-radius: 8px;
     box-shadow: var(--shadow-1);
@@ -104,4 +109,15 @@ video {
 .return-button:hover {
     background: rgba(0, 0, 0, 0.9);
     padding-left: 32px;
+}
+
+.video-info h1 {
+    font-size: 24px;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.video-info p {
+    color: var(--text-secondary);
+    line-height: 1.5;
 }

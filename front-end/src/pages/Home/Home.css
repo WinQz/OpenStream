@@ -170,13 +170,14 @@
 
 .video-card {
     position: relative;
-    width: 300px;
-    height: 169px;
+    width: 400px; /* Increased from 300px */
+    height: 225px; /* Increased from 169px to maintain 16:9 ratio */
     border-radius: 12px;
     overflow: hidden;
     transition: var(--transition-medium);
     transform-origin: center center;
     box-shadow: var(--shadow-1);
+    z-index: 1; /* Add base z-index */
 }
 
 .video-card:hover {
@@ -200,34 +201,91 @@
 
 .play-button-overlay {
     cursor: pointer;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(0);
-    width: 64px;
-    height: 64px;
-    background: rgba(229, 9, 20, 0.9);
-    border-radius: 50%;
+    position: relative; /* Changed from static */
+    padding: 10px 20px;
+    background: linear-gradient(
+        to bottom right,
+        rgba(46, 204, 113, 0.95),
+        rgba(39, 174, 96, 0.95)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    opacity: 1;
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 28px;
-    opacity: 0;
-    transition: var(--transition-medium);
-    z-index: 2;
+    gap: 10px;
+    transition: all 0.2s ease;
+    z-index: 4; /* Highest z-index */
+    pointer-events: auto; /* Re-enable clicks for button */
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.1),
+        0 1px 3px rgba(0, 0, 0, 0.08),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(4px);
-    box-shadow: 0 0 30px rgba(229, 9, 20, 0.4);
+    letter-spacing: 0.3px;
+}
+
+.play-button-overlay::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 100%
+    );
+    transform: rotate(45deg);
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+.video-card:hover .play-button-overlay::before {
+    animation: shine 1.5s infinite;
+    opacity: 1;
+}
+
+@keyframes shine {
+    0% {
+        left: -50%;
+    }
+    100% {
+        left: 100%;
+    }
 }
 
 .play-button-overlay:hover {
-    background: rgba(229, 9, 20, 1);
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: translateY(-1px) scale(1.02);
+    background: linear-gradient(
+        to bottom right,
+        rgba(46, 204, 113, 1),
+        rgba(39, 174, 96, 1)
+    );
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 7px 14px rgba(0, 0, 0, 0.15),
+        0 3px 6px rgba(0, 0, 0, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.15);
 }
 
+.play-button-overlay:active {
+    transform: translateY(1px);
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        0 1px 2px rgba(0, 0, 0, 0.08),
+        inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+/* Remove these conflicting styles */
 .video-card:hover .play-button-overlay {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
+    transform: none;
 }
 
 .video-card::after {
@@ -264,20 +322,34 @@
     bottom: 0;
     left: 0;
     right: 0;
-    padding: var(--spacing-md) var(--spacing-md);
+    padding: var(--spacing-md);
     background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 50%, transparent 100%);
-    transform: translateY(100%);
-    transition: var(--transition-medium);
+    opacity: 0; /* Hide by default */
+    transform: translateY(20px);
+    transition: all var(--transition-medium);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end; /* Changed from center */
+    gap: 16px;
+    z-index: 3; /* Higher z-index than card */
+    pointer-events: none; /* Let clicks pass through the info container */
 }
 
 .video-card:hover .video-info {
+    opacity: 1;
     transform: translateY(0);
+}
+
+.video-info-text {
+    flex: 1;
+    margin-right: 16px;
+    pointer-events: none; /* Prevent text from blocking clicks */
 }
 
 .video-info h3 {
     color: white;
     margin: 0 0 8px 0;
-    font-size: 16px;
+    font-size: 18px; /* Increased from 16px */
 }
 
 .video-info p {

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { mockVideos } from '../../data/mockData';
 import VideoPlayer from '../../components/VideoPlayer';
+import VideoHeader from '../../components/VideoHeader';
 import Loading from '../../components/Loading';
 import './Watch.css';
 
@@ -10,25 +12,33 @@ interface WatchParams {
 
 const Watch: React.FC = () => {
     const { id } = useParams<WatchParams>();
-    const history = useHistory();
+    const [video, setVideo] = useState(mockVideos[0]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const handleVideoLoad = () => {
-        setIsLoading(false);
-    };
+    useEffect(() => {
+        // Find the video in mock data
+        const foundVideo = mockVideos.find(v => v.id === id);
+        if (foundVideo) {
+            setVideo(foundVideo);
+        }
+        // Simulate loading
+        setTimeout(() => setIsLoading(false), 1000);
+    }, [id]);
+
+    if (isLoading) {
+        return <Loading message="Preparing your video..." />;
+    }
 
     return (
         <div className="watch-page">
-            {isLoading && <Loading message="Preparing your video..." />}
-            <button className="return-button" onClick={() => history.push('/')}>
-                ← Back
-            </button>
-            <div className="video-player-container">
-                <VideoPlayer 
-                    source={`https://example.com/videos/${id}.mp4`}
-                    controls={true}
-                    onLoad={handleVideoLoad}
-                />
+            <VideoHeader />
+            <VideoPlayer 
+                source={video.url}
+                poster={video.thumbnail}
+            />
+            <div className="video-info">
+                <h1>{video.title}</h1>
+                <p>{video.description}</p>
             </div>
         </div>
     );
