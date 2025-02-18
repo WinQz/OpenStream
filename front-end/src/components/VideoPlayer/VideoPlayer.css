@@ -1,20 +1,22 @@
 .video-player-container {
     position: relative;
-    width: 100%;
-    max-width: 1280px;
-    margin: 0 auto;
+    width: 100vw;
+    height: 100vh;
     background: var(--background);
-    border-radius: 12px;
     overflow: hidden;
-    box-shadow: var(--shadow-2);
 }
 
 .video-player {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 9;
+    height: 100%;
     background: #000;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Change to cover to fill the screen */
 }
 
 .video-player:fullscreen {
@@ -24,13 +26,6 @@
 
 .video-player:fullscreen video {
     height: 100vh;
-}
-
-video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    cursor: pointer;
 }
 
 .video-controls {

@@ -32,13 +32,11 @@ const Watch: React.FC = () => {
     return (
         <div className="watch-page">
             <VideoHeader />
-            <VideoPlayer 
-                source={video.url}
-                poster={video.thumbnail}
-            />
-            <div className="video-info">
-                <h1>{video.title}</h1>
-                <p>{video.description}</p>
+            <div className="video-player-container">
+                <VideoPlayer 
+                    source={video.url}
+                    poster={video.thumbnail}
+                />
             </div>
         </div>
     );
