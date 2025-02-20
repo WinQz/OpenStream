@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './VideoPlayer.css';
+import './VideoPreview.css';
 
 const PlayIcon = () => (
     <svg viewBox="0 0 24 24">
@@ -58,6 +59,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, poster, onLoad }) => 
     const [showSpeedMenu, setShowSpeedMenu] = useState(false);
     const [playbackSpeed, setPlaybackSpeed] = useState(1);
     const speedMenuRef = useRef<HTMLDivElement>(null);
+    const [previewPosition, setPreviewPosition] = useState<number | null>(null);
+    const [previewTime, setPreviewTime] = useState(0);
+    const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
     const speeds = [
         { label: '0.25x', value: 0.25 },
@@ -96,11 +100,38 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, poster, onLoad }) => 
         const rect = progressBar.getBoundingClientRect();
         const pos = (e.clientX - rect.left) / rect.width;
         video.currentTime = pos * video.duration;
+        setPreviewPosition(null);
     };
 
-    const handleProgressDrag = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!isDragging) return;
-        handleProgressClick(e);
+    const handleProgressHover = (e: React.MouseEvent<HTMLDivElement>) => {
+        const progressBar = progressRef.current;
+        if (!progressBar || !videoRef.current) return;
+
+        // Only update preview without seeking
+        const rect = progressBar.getBoundingClientRect();
+        const position = (e.clientX - rect.left) / rect.width;
+        const previewTime = position * videoRef.current.duration;
+
+        setPreviewPosition(e.clientX);
+        setPreviewTime(previewTime);
+        
+        // Generate preview frame without affecting playback
+        const video = videoRef.current;
+        const canvas = previewCanvasRef.current;
+        if (!video || !canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // Create a temporary video element for preview
+        const tempVideo = document.createElement('video');
+        tempVideo.src = video.src;
+        tempVideo.currentTime = previewTime;
+
+        tempVideo.addEventListener('seeked', () => {
+            ctx.drawImage(tempVideo, 0, 0, canvas.width, canvas.height);
+            tempVideo.remove();
+        }, { once: true });
     };
 
     const handleVolumeChange = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -166,6 +197,40 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, poster, onLoad }) => 
         setPlaybackSpeed(speed);
         video.playbackRate = speed;
         setShowSpeedMenu(false);
+    };
+
+    const generatePreviewFrame = (time: number) => {
+        const video = videoRef.current;
+        const canvas = previewCanvasRef.current;
+        if (!video || !canvas) return;
+
+        // Store current time
+        const currentTime = video.currentTime;
+        
+        // Set video to preview time
+        video.currentTime = time;
+        
+        // When the video seeks to the new time
+        video.addEventListener('seeked', () => {
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            // Draw the current frame
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            // Restore original playback position
+            video.currentTime = currentTime;
+        }, { once: true });
+    };
+
+    const formatPreviewTime = (time: number) => {
+        const hours = Math.floor(time / 3600);
+        const minutes = Math.floor((time % 3600) / 60);
+        const seconds = Math.floor(time % 60);
+        if (hours > 0) {
+            return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     };
 
     useEffect(() => {
@@ -305,10 +370,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, poster, onLoad }) => 
                     <div 
                         className="progress-container"
                         onClick={handleProgressClick}
-                        onMouseDown={() => setIsDragging(true)}
-                        onMouseUp={() => setIsDragging(false)}
-                        onMouseLeave={() => setIsDragging(false)}
-                        onMouseMove={handleProgressDrag}
+                        onMouseMove={handleProgressHover}
+                        onMouseLeave={() => setPreviewPosition(null)}
                     >
                         <div className="progress-bar" ref={progressRef}>
                             <div 
@@ -318,6 +381,22 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ source, poster, onLoad }) => 
                                 <div className="progress-handle" />
                             </div>
                         </div>
+                        {previewPosition !== null && (
+                            <div 
+                                className="video-preview visible"
+                                style={{ left: previewPosition }}
+                            >
+                                <canvas 
+                                    ref={previewCanvasRef}
+                                    className="preview-thumbnail"
+                                    width="160"
+                                    height="90"
+                                />
+                                <div className="preview-time">
+                                    {formatPreviewTime(previewTime)}
+                                </div>
+                            </div>
+                        )}
                     </div>
                     
                     <div className="controls-main">
