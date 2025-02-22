@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { mockVideos } from '../../data/mockData';
+import { useParams, useHistory } from 'react-router-dom';
+import { fetchVideoById } from '../../services/api';
+import { MovieDetails } from '../../types';
 import VideoPlayer from '../../components/VideoPlayer';
 import VideoHeader from '../../components/VideoHeader';
 import Loading from '../../components/Loading';
@@ -12,21 +13,40 @@ interface WatchParams {
 
 const Watch: React.FC = () => {
     const { id } = useParams<WatchParams>();
-    const [video, setVideo] = useState(mockVideos[0]);
+    const history = useHistory();
+    const [video, setVideo] = useState<MovieDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // Find the video in mock data
-        const foundVideo = mockVideos.find(v => v.id === id);
-        if (foundVideo) {
-            setVideo(foundVideo);
-        }
-        // Simulate loading
-        setTimeout(() => setIsLoading(false), 1000);
+        const loadVideo = async () => {
+            try {
+                setIsLoading(true);
+                const data = await fetchVideoById(id);
+                setVideo(data);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load video');
+                console.error('Error loading video:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadVideo();
     }, [id]);
 
     if (isLoading) {
         return <Loading message="Preparing your video..." />;
+    }
+
+    if (error || !video) {
+        return (
+            <div className="error-container">
+                <h2>Error loading video</h2>
+                <p>{error}</p>
+                <button onClick={() => history.push('/')}>Return Home</button>
+            </div>
+        );
     }
 
     return (

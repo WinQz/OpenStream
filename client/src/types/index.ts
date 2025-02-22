@@ -22,3 +22,20 @@ export interface VideoSection {
     title: string;
     videos: Video[];
 }
+
+export interface MovieDetails {
+    id: string;
+    title: string;
+    description: string;
+    extendedDescription?: string;
+    thumbnail: string;
+    url: string;
+    duration: number;
+    views: number;
+    categoryId: string;
+    releaseYear: number;
+    rating: string;
+    cast: string[];
+    directors: string[];
+    genres: string[];
+}

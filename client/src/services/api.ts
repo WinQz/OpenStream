@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { Video, Category } from '../types';
+import { Video, Category, MovieDetails } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 
@@ -21,11 +21,16 @@ const handleError = (error: AxiosError) => {
   }
 };
 
-export const fetchVideos = async (): Promise<Video[]> => {
+export const fetchVideos = async (): Promise<MovieDetails[]> => {
   try {
-    const response: AxiosResponse<Video[]> = await api.get('/videos');
+    const response: AxiosResponse<MovieDetails[]> = await api.get('/videos');
     return response.data;
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      const { mockVideos } = require('../data/mockData');
+      console.warn('Using mock data:', error);
+      return mockVideos;
+    }
     handleError(error as AxiosError);
     return [];
   }
@@ -41,11 +46,17 @@ export const fetchCategories = async (): Promise<Category[]> => {
   }
 };
 
-export const fetchVideoById = async (id: string): Promise<Video> => {
+export const fetchVideoById = async (id: string): Promise<MovieDetails> => {
   try {
-    const response: AxiosResponse<Video> = await api.get(`/videos/${id}`);
+    const response: AxiosResponse<MovieDetails> = await api.get(`/videos/${id}`);
     return response.data;
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      const { mockVideos } = require('../data/mockData');
+      const video = mockVideos.find((v: MovieDetails) => v.id === id);
+      if (!video) throw new Error('Video not found');
+      return video;
+    }
     handleError(error as AxiosError);
     throw error;
   }

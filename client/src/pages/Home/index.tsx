@@ -1,28 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { mockVideos, MovieDetails } from '../../data/mockData';
+import { fetchVideos } from '../../services/api';
+import { MovieDetails } from '../../types';
 import Loading from '../../components/Loading';
 import './Home.css';
 
 const Home: React.FC = () => {
-    const [videos, setVideos] = useState(mockVideos);
+    const [videos, setVideos] = useState<MovieDetails[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [showInfo, setShowInfo] = useState(false);
-    const [featuredVideo, setFeaturedVideo] = useState(mockVideos[0]);
+    const [featuredVideo, setFeaturedVideo] = useState<MovieDetails | null>(null);
     const history = useHistory();
     const [currentPage, setCurrentPage] = useState({ trending: 0, continue: 0 });
 
     const handleLoadError = () => {
-        // Handle loading error
         console.error('Failed to load content');
     };
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 1500);
-        
-        return () => clearTimeout(timer);
+        const loadVideos = async () => {
+            try {
+                setIsLoading(true);
+                const data = await fetchVideos();
+                setVideos(data);
+                setFeaturedVideo(data[0]);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to load videos');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadVideos();
     }, []);
 
     const handlePlayClick = (e: React.MouseEvent, videoId: string) => {
@@ -123,19 +133,19 @@ const Home: React.FC = () => {
                 <div 
                     className={`featured ${showInfo ? 'show-info' : ''}`}
                     style={{ 
-                        backgroundImage: `url(${featuredVideo.thumbnail})`,
+                        backgroundImage: `url(${featuredVideo?.thumbnail})`,
                         backgroundPosition: 'center 20%'
                     }}
                 >
                     <div className="featured-content">
                         {!showInfo ? (
                             <>
-                                <h1>{featuredVideo.title}</h1>
-                                <p>{featuredVideo.description}</p>
+                                <h1>{featuredVideo?.title}</h1>
+                                <p>{featuredVideo?.description}</p>
                                 <div className="featured-buttons">
                                     <button 
                                         className="play-btn"
-                                        onClick={(e) => handlePlayClick(e, featuredVideo.id)}
+                                        onClick={(e) => handlePlayClick(e, featuredVideo?.id || '')}
                                     >
                                         ▶ Play Now
                                     </button>
@@ -150,7 +160,7 @@ const Home: React.FC = () => {
                         ) : (
                             <div className="featured-info">
                                 <div className="featured-info-header">
-                                    <h1>{featuredVideo.title}</h1>
+                                    <h1>{featuredVideo?.title}</h1>
                                     <button 
                                         className="close-info-btn"
                                         onClick={toggleInfo}
@@ -160,23 +170,23 @@ const Home: React.FC = () => {
                                 </div>
                                 <div className="featured-info-content">
                                     <div className="info-metadata">
-                                        <span className="year">{featuredVideo.releaseYear}</span>
-                                        <span className="duration">{formatDuration(featuredVideo.duration)}</span>
-                                        <span className="rating">{featuredVideo.rating}</span>
+                                        <span className="year">{featuredVideo?.releaseYear}</span>
+                                        <span className="duration">{formatDuration(featuredVideo?.duration || 0)}</span>
+                                        <span className="rating">{featuredVideo?.rating}</span>
                                     </div>
                                     <p className="extended-description">
-                                        {featuredVideo.extendedDescription || featuredVideo.description}
+                                        {featuredVideo?.extendedDescription || featuredVideo?.description}
                                     </p>
                                     <div className="info-details">
-                                        <p><strong>Starring:</strong> {featuredVideo.cast.join(', ')}</p>
-                                        <p><strong>Directors:</strong> {featuredVideo.directors.join(', ')}</p>
-                                        <p><strong>Genre:</strong> {featuredVideo.genres.join(', ')}</p>
+                                        <p><strong>Starring:</strong> {featuredVideo?.cast.join(', ')}</p>
+                                        <p><strong>Directors:</strong> {featuredVideo?.directors.join(', ')}</p>
+                                        <p><strong>Genre:</strong> {featuredVideo?.genres.join(', ')}</p>
                                     </div>
                                 </div>
                                 <div className="featured-buttons">
                                     <button 
                                         className="play-btn"
-                                        onClick={(e) => handlePlayClick(e, featuredVideo.id)}
+                                        onClick={(e) => handlePlayClick(e, featuredVideo?.id || '')}
                                     >
                                         ▶ Play Now
                                     </button>
